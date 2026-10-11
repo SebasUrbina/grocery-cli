@@ -1,73 +1,79 @@
-<p align="center">
-  <img src="assets/logo.png" alt="Uber Eats CLI" width="300">
-</p>
+# Grocery CLI
 
-<p align="center">Order from Uber Eats via the terminal, REST API, or MCP server for Claude Code.</p>
+CLI experimental para supermercados en Chile, con interfaces REST (Hono) y MCP. Usa Bun, TypeScript y Zod; deriva del proyecto Uber Eats CLI de crafter-station.
 
-## Install
+## Instalación local
 
 ```bash
-npm install -g ubereats-cli
+bun install --frozen-lockfile
+cp .env.example .env.local
+# Completa las claves API del proveedor en .env.local.
+bun run index.ts help
+bun run typecheck
 ```
 
-## Quick Start
+Las claves se leen desde variables de entorno: `JUMBO_<DOMINIO>_API_KEY` o `SANTAISABEL_<DOMINIO>_API_KEY`, donde el dominio es `CATALOG`, `CART`, `LOCATION`, `SESSION` u `ORDERS`. Solo necesitas configurar las claves de las operaciones que uses. Bun carga `.env.local` automáticamente. No se incluyen valores reales en el repositorio.
+
+Para iniciar sesión mediante navegador:
 
 ```bash
-ubereats login              # Opens browser → log in → session auto-captured
-ubereats search "pizza"     # Search for food
-ubereats store <uuid>       # View restaurant menu
-ubereats add-to-cart <store_uuid> <item_uuid> "Pepperoni Pizza"
-ubereats checkout           # Preview order
-ubereats place-order        # Place it!
-ubereats orders             # Track delivery
+bunx playwright install chromium
+bun run index.ts login --provider jumbo
+bun run index.ts search "leche" --provider jumbo
+bun run index.ts search "leche" --provider santaisabel
+bun run index.ts cart --provider jumbo
+bun run index.ts checkout --provider jumbo
+bun run index.ts orders --provider santaisabel
+bun run index.ts order <id> --provider santaisabel
 ```
 
-## Commands
+`--provider` (o `-p`) selecciona el proveedor; el valor predeterminado es `jumbo`. Los tokens personales se guardan en `.grocery-config.json`, con permisos de lectura y escritura para el propietario.
 
-### Browse
-- `ubereats search <query>` — Search restaurants and items
-- `ubereats restaurants [limit]` — List nearby restaurants
-- `ubereats store <store_uuid>` — Restaurant details and menu
-- `ubereats product <store_uuid> <item_uuid>` — Item customization options
+## Estado de las integraciones
 
-### Order
-- `ubereats add-to-cart <store> <item> [name] [qty] [customizations]` — Add to cart
-- `ubereats remove-from-cart <item_uuid>` — Remove from cart
-- `ubereats cart` — View current cart
-- `ubereats tip <percent>` — Set tip (0, 5, 10, 15, 20)
-- `ubereats checkout` — Preview order summary
-- `ubereats place-order` — Place the order
-- `ubereats orders` — Track orders
+| Función | Jumbo / Santa Isabel | PedidosYa |
+|---|---|---|
+| Búsqueda y detalle de producto | Implementados | Pendiente |
+| Perfil, direcciones y carrito | Implementados | Pendiente |
+| Vista previa de checkout | Implementada | Pendiente |
+| Historial y detalle de pedidos | Implementados; requieren clave ORDERS | Pendiente |
+| Confirmar una compra | Pendiente; el comando CLI simula el resultado | Pendiente |
+| Detalle de tienda y tiendas cercanas | Pendientes | Pendientes |
+| Cambiar dirección, propina y método de pago | Pendientes | Pendientes |
 
-### Account
-- `ubereats login [lat] [lng]` — Log in via browser
-- `ubereats setup <cookies>` — Manual cookie setup
-- `ubereats addresses` — List saved addresses
-- `ubereats addresses switch <label>` — Switch delivery address
-- `ubereats whoami` — User profile
+“Implementado” describe el código disponible; no implica validación contra los servicios reales. Las API utilizadas son internas y pueden cambiar.
 
-### API
-- `ubereats server` — Start REST API (port 3200)
-- `ubereats mcp` — Start MCP server for Claude Code
+## REST y MCP
 
-## MCP Server (Claude Code)
+```bash
+bun run server.ts
+bun run src/mcp/index.ts
+```
 
-Add to your project's `.mcp.json`:
+La API escucha en el puerto 3200. Selecciona proveedor mediante `?provider=jumbo` o `?provider=santaisabel`. Actualmente no implementa autenticación para sus clientes y permite CORS general; requiere restringir el acceso antes de exponerla en una red.
+
+Ejemplo de configuración MCP local (ajusta la ruta; `.mcp.json` está ignorado):
 
 ```json
 {
   "mcpServers": {
-    "ubereats": {
+    "grocery": {
       "command": "bun",
       "args": ["run", "src/mcp/index.ts"],
-      "cwd": "/path/to/ubereats-cli"
+      "cwd": "/path/to/grocery-cli"
     }
   }
 }
 ```
 
-16 tools available: `whoami`, `search`, `list_restaurants`, `get_store`, `get_item_options`, `add_to_cart`, `remove_from_cart`, `get_cart`, `checkout_preview`, `set_tip`, `list_payment_methods`, `set_payment_method`, `place_order`, `track_orders`, `list_addresses`, `switch_address`
+## Credenciales y archivos locales
 
-## License
+Se excluyen de Git `.env*` (excepto `.env.example`), configuraciones y sesiones locales, `.mcp.json`, capturas `dump*`, archivos HAR, logs, herramientas locales y la copia de referencia `ubereats-cli/`. Los ejemplos contienen nombres y campos vacíos, sin credenciales.
 
-MIT
+Antes de publicar, revisa el contenido preparado y el historial. `.gitignore` no elimina archivos ya versionados ni secretos de commits anteriores.
+
+Consulta [PROJECT_REVIEW.md](PROJECT_REVIEW.md) para el análisis técnico y los límites de la verificación.
+
+## Licencia
+
+MIT, según los metadatos del proyecto original.

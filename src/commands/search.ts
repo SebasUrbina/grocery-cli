@@ -2,15 +2,18 @@ import { loadConfig } from "../config";
 import { formatPrice } from "../formatters";
 import { search } from "../services/search";
 import { printTable, withSpinner, uberGreenBold, dim, bold, hint } from "../ui";
+import { parseProviderArgs } from "../utils/args";
 
-const query = process.argv[2];
+const { provider, args } = parseProviderArgs(process.argv.slice(2));
+const query = args[0];
+
 if (!query) {
-  console.error("Usage: ubereats search <query>");
+  console.error("Usage: grocery search <query> [--provider <name>]");
   process.exit(1);
 }
 
 const config = await loadConfig();
-const result = await withSpinner(`Searching "${query}"...`, () => search(query, config));
+const result = await withSpinner(`Searching "${query}" on ${provider}...`, () => search(query, config, provider));
 
 if (!result.stores?.length && !result.items?.length) {
   console.log(`\n  No results for "${query}"\n`);

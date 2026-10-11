@@ -1,12 +1,14 @@
+import { parseProviderArgs } from "../utils/args";
 import { loadConfig } from "../config";
 import { formatPrice } from "../formatters";
 import { getNearbyRestaurants } from "../services/search";
 import { printTable, withSpinner, dim, warn } from "../ui";
 
-const limit = parseInt(process.argv[2] || "15");
+const { provider, args } = parseProviderArgs(process.argv.slice(2));
+const limit = parseInt(args[0] || "15");
 const config = await loadConfig();
 const stores = await withSpinner("Loading restaurants...", () =>
-  getNearbyRestaurants(config, limit),
+  getNearbyRestaurants(config, provider, limit),
 );
 
 if (!stores.length) {

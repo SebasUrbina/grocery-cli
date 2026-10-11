@@ -2,18 +2,20 @@ import { loadConfig } from "../config";
 import { formatPrice } from "../formatters";
 import { removeFromCart, getCart } from "../services/cart";
 import { withSpinner, ok, fail, dim, bold } from "../ui";
+import { parseProviderArgs } from "../utils/args";
 
-const itemUuid = process.argv[2];
+const { provider, args } = parseProviderArgs(process.argv.slice(2));
+const itemUuid = args[0];
 
 if (!itemUuid) {
-  console.error("Usage: ubereats remove-from-cart <item_uuid>");
-  console.error('  item_uuid: shopping cart item UUID from "ubereats cart"');
+  console.error("Usage: grocery remove-from-cart <item_uuid> [--provider <name>]");
+  console.error('  item_uuid: shopping cart item UUID from "grocery cart"');
   process.exit(1);
 }
 
 const config = await loadConfig();
 
-const cart = await withSpinner("Loading cart...", () => getCart(config));
+const cart = await withSpinner(`Loading cart from ${provider}...`, () => getCart(config, provider));
 if (!cart) {
   console.log(`\n${fail("Cart is empty.")}\n`);
   process.exit(1);
@@ -31,14 +33,14 @@ for (const store of cart.stores) {
 
 if (!found) {
   console.log(`\n${fail(`Item "${itemUuid}" not found in cart.`)}`);
-  console.log(`  ${dim("Run")} ubereats cart ${dim("to see item UUIDs.")}\n`);
+  console.log(`  ${dim("Run")} grocery cart --provider ${provider} ${dim("to see item UUIDs.")}\n`);
   process.exit(1);
 }
 
-await withSpinner("Removing...", () => removeFromCart(itemUuid, config));
+await withSpinner("Removing...", () => removeFromCart(itemUuid, config, provider));
 console.log(`${ok("Removed from cart")}\n`);
 
-const updated = await getCart(config);
+const updated = await getCart(config, provider);
 if (!updated || !updated.stores.length) {
   console.log(`  ${dim("Cart is now empty.")}\n`);
 } else {

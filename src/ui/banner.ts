@@ -10,8 +10,8 @@ export function printBanner(version?: string) {
     process.stdout.write(logo);
   } catch {
     // Fallback if logo file is missing
-    console.log("  Uber Eats CLI");
+    console.log("  Grocery CLI");
   }
-  if (version) console.log(`\n  ${dim(`v${version}  ·  Order from Uber Eats via the terminal`)}`);
+  if (version) console.log(`\n  ${dim(`v${version}  ·  Order from Jumbo, Santa Isabel & PedidosYa`)}`);
   console.log();
 }

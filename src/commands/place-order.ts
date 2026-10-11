@@ -1,31 +1,36 @@
-import { loadConfig } from "../config";
+import { loadConfig, saveConfig } from "../config";
 import { formatPrice } from "../formatters";
-import { getCart } from "../services/cart";
 import { placeOrder } from "../services/order";
-import { withSpinner, ok, fail, uberGreenBold, dim, bold } from "../ui";
+import { getCheckoutDetail } from "../services/checkout";
+import { withSpinner, brandBold, success, error, dim, bold, warn } from "../ui";
+import { parseProviderArgs } from "../utils/args";
+
+const { provider, args } = parseProviderArgs(process.argv.slice(2));
 
 const config = await loadConfig();
 
-const cart = await withSpinner("Validating cart...", () => getCart(config));
-if (!cart || !cart.stores?.length) {
-  console.log(`\n${fail("Cart is empty.")}\n`);
-  process.exit(1);
-}
-
-console.log(`\n  ${uberGreenBold("Placing order")}\n`);
-for (const store of cart.stores) {
-  console.log(`  ${bold(store.storeName)}`);
-  for (const item of store.items) {
-    console.log(`    ${item.title} ${dim(`x${item.quantity}`)} -- ${formatPrice(item.totalPrice / 100)}`);
-  }
-  console.log(`  ${dim("Total")} ${bold(formatPrice(store.total / 100))}\n`);
-}
-
 try {
-  const result = await withSpinner("Placing order...", () => placeOrder(config));
-  console.log(`\n${ok("Order placed!")}`);
-  console.log(`\n  ${dim(JSON.stringify(result, null, 2))}\n`);
-} catch (err: any) {
-  console.log(`\n${fail(`Failed to place order: ${err.message}`)}\n`);
+  const detail = await withSpinner(`Reviewing order on ${provider}...`, () => getCheckoutDetail(config, provider));
+
+  console.log(`\n  ${brandBold("Order Confirmation")}`);
+  console.log(`  ${dim("Total:")} ${bold(formatPrice(detail.total / 100))}`);
+  if (detail.paymentMethod) {
+    console.log(`  ${dim("Payment:")} ${detail.paymentMethod.type} ending in ${detail.paymentMethod.lastFour || ""}`);
+  } else {
+    console.log(`  ${dim("Payment:")} Not selected`);
+  }
+
+  console.log(`\n  ${warn("Placing order is currently mock-only for safety/missing APIs.")}\n`);
+
+  // const result = await withSpinner("Placing order...", () => placeOrder(config, provider));
+  // config.draftOrderUuid = undefined;
+  // await saveConfig(config);
+
+  console.log(`  ${success("\u2713")} Order placed successfully! (Mocked)`);
+  // console.log(`  ${dim("Order ID:")} ${result.orderId || "N/A"}`);
+  console.log(`  ${dim("ETA:")} ${detail.estimatedDelivery || "N/A"}\n`);
+
+} catch (e: any) {
+  console.log(`\n  ${error(e.message)}\n`);
   process.exit(1);
 }

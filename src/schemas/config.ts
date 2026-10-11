@@ -1,11 +1,19 @@
 import { z } from "zod/v4";
 
-export const UberEatsConfigSchema = z.object({
-  cookies: z.string(),
-  lat: z.number(),
-  lng: z.number(),
-  address: z.string().optional(),
-  draftOrderUuid: z.string().optional(),
+export const ProviderConfigSchema = z.object({
+  cookies: z.string().optional(),
+  token: z.string().optional(),
+  draftOrderId: z.string().optional(),
+  storeId: z.string().optional(),
 });
 
-export type UberEatsConfig = z.infer<typeof UberEatsConfigSchema>;
+export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
+
+export const ConfigSchema = z.object({
+  lat: z.number().optional(),
+  lng: z.number().optional(),
+  address: z.string().optional(),
+  providers: z.record(z.string(), ProviderConfigSchema).default({}),
+});
+
+export type Config = z.infer<typeof ConfigSchema>;

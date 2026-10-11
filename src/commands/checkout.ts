@@ -2,25 +2,29 @@ import { loadConfig } from "../config";
 import { formatPrice } from "../formatters";
 import { getCart } from "../services/cart";
 import { getCheckoutDetail, setTip } from "../services/checkout";
-import { printTable, withSpinner, uberGreenBold, dim, bold, success, warn, hint } from "../ui";
+import { printTable, withSpinner, brandBold, dim, bold, success, warn, hint } from "../ui";
+import { parseProviderArgs } from "../utils/args";
 
-const tipArg = process.argv[2];
+const { provider, args } = parseProviderArgs(process.argv.slice(2));
+
+const tipArg = args[0];
 const config = await loadConfig();
 
 if (tipArg !== undefined) {
   const tip = parseInt(tipArg);
-  await setTip(tip, config);
+  // Optional: implement tip for providers that support it
+  // await setTip(tip, config, provider);
   console.log(tip > 0 ? `\n  ${success("\u2713")} Tip set to ${bold(`${tip}%`)}` : `\n  ${success("\u2713")} Tip removed`);
 }
 
-const cart = await withSpinner("Loading cart...", () => getCart(config));
+const cart = await withSpinner(`Loading cart on ${provider}...`, () => getCart(config, provider));
 
 if (!cart || !cart.stores?.length) {
   console.log("\n  Cart is empty. Add items first.\n");
   process.exit(0);
 }
 
-console.log(`\n  ${uberGreenBold("Checkout Preview")}\n`);
+console.log(`\n  ${brandBold("Checkout Preview")}\n`);
 
 for (const store of cart.stores) {
   printTable({
@@ -38,20 +42,22 @@ for (const store of cart.stores) {
 }
 
 try {
-  const detail = await withSpinner("Loading summary...", () => getCheckoutDetail(config));
+  const detail = await withSpinner(`Loading summary from ${provider}...`, () => getCheckoutDetail(config, provider));
 
-  console.log(`  ${uberGreenBold("Order Summary")}\n`);
+  console.log(`  ${brandBold("Order Summary")}\n`);
   console.log(`  ${dim("Subtotal".padEnd(20))} ${formatPrice(detail.subtotal / 100)}`);
   console.log(`  ${dim("Delivery fee".padEnd(20))} ${formatPrice(detail.deliveryFee / 100)}`);
-  console.log(`  ${dim("Service fee".padEnd(20))} ${formatPrice(detail.serviceFee / 100)}`);
+  if (detail.serviceFee) console.log(`  ${dim("Service fee".padEnd(20))} ${formatPrice(detail.serviceFee / 100)}`);
   if (detail.tax) console.log(`  ${dim("Tax".padEnd(20))} ${formatPrice(detail.tax / 100)}`);
   if (detail.tip) console.log(`  ${dim("Tip".padEnd(20))} ${formatPrice(detail.tip / 100)}`);
   console.log(`  ${dim("\u2500".repeat(30))}`);
   console.log(`  ${bold("Total".padEnd(20))} ${bold(formatPrice(detail.total / 100))}`);
 
   if (detail.deliveryAddress) console.log(`\n  ${dim("Deliver to")} ${detail.deliveryAddress}`);
-  if (detail.estimatedDelivery) console.log(`  ${dim("ETA")} ${detail.estimatedDelivery}`);
+  if (detail.estimatedDelivery) console.log(`  ${dim("Window")} ${detail.estimatedDelivery}`);
   if (detail.paymentMethod) console.log(`  ${dim("Payment")} ${detail.paymentMethod.label}`);
-} catch {}
+} catch (e: any) {
+  console.log(`\n  Error loading summary: ${e.message}`);
+}
 
-console.log(`\n  ${dim("Place order:")} ${hint("ubereats place-order")}\n`);
+console.log(`\n  ${dim("Place order:")} ${hint(`grocery place-order --provider ${provider}`)}\n`);

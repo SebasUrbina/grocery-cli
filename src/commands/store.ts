@@ -2,15 +2,18 @@ import { loadConfig } from "../config";
 import { formatPrice } from "../formatters";
 import { getStoreDetail } from "../services/store";
 import { printDetail, printTable, withSpinner, uberGreenBold, dim, bold, hint, success, warn } from "../ui";
+import { parseProviderArgs } from "../utils/args";
 
-const storeUuid = process.argv[2];
+const { provider, args } = parseProviderArgs(process.argv.slice(2));
+const storeUuid = args[0];
+
 if (!storeUuid) {
-  console.error("Usage: ubereats store <store_uuid>");
+  console.error("Usage: grocery store <store_uuid> [--provider <name>]");
   process.exit(1);
 }
 
 const config = await loadConfig();
-const store = await withSpinner("Loading store...", () => getStoreDetail(storeUuid, config));
+const store = await withSpinner(`Loading store on ${provider}...`, () => getStoreDetail(storeUuid, config, provider));
 
 const status = store.isOpen !== false ? success("OPEN") : warn("CLOSED");
 

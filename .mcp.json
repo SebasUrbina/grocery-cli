@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "ubereats": {
-      "command": "bun",
-      "args": ["run", "src/mcp/index.ts"],
-      "cwd": "/Users/cris/hackathons/ubereats-cli"
-    }
-  }
-}

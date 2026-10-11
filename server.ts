@@ -1,7 +1,7 @@
 import app from "./src/api/app";
 import { API_PORT } from "./src/constants";
 
-console.log(`Uber Eats API running on http://localhost:${API_PORT}`);
+console.log(`Grocery API running on http://localhost:${API_PORT}`);
 
 export default {
   port: API_PORT,

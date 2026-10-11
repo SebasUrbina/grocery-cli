@@ -1,6 +1,11 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "types": [
+      "bun"
+    ],
+    "lib": [
+      "ESNext"
+    ],
     "target": "ESNext",
     "module": "ESNext",
     "moduleDetection": "force",
@@ -17,5 +22,10 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  "include": [
+    "index.ts",
+    "server.ts",
+    "src/**/*.ts"
+  ]
 }

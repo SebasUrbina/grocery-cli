@@ -1,21 +1,25 @@
 import { loadConfig } from "../config";
 import { formatPrice } from "../formatters";
 import { getItemDetail } from "../services/product";
-import { printTable, withSpinner, uberGreenBold, dim, warn } from "../ui";
+import { printTable, withSpinner, brandBold, dim, warn } from "../ui";
+import { parseProviderArgs } from "../utils/args";
 
-const storeUuid = process.argv[2];
-const itemUuid = process.argv[3];
+const { provider, args } = parseProviderArgs(process.argv.slice(2));
+
+const storeUuid = args[0];
+const itemUuid = args[1];
+
 if (!storeUuid || !itemUuid) {
-  console.error("Usage: ubereats product <store_uuid> <item_uuid>");
+  console.error("Usage: grocery product <store_uuid> <item_uuid> [--provider <name>]");
   process.exit(1);
 }
 
 const config = await loadConfig();
-const item = await withSpinner("Loading options...", () =>
-  getItemDetail(storeUuid, itemUuid, config),
+const item = await withSpinner(`Loading options on ${provider}...`, () =>
+  getItemDetail(storeUuid, itemUuid, config, provider),
 );
 
-console.log(`\n  ${uberGreenBold(item.title)} ${dim(`${formatPrice(item.price / 100)}`)}`);
+console.log(`\n  ${brandBold(item.title)} ${dim(`${formatPrice(item.price / 100)}`)}`);
 if (item.itemDescription) console.log(`  ${dim(item.itemDescription)}`);
 console.log();
 

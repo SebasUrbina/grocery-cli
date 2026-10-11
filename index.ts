@@ -14,7 +14,7 @@ const currentVersion = JSON.parse(readFileSync(pkgPath, "utf-8")).version;
 const skipUpdateCheck = !command || command === "mcp" || command === "server";
 const updateCheck = skipUpdateCheck
   ? Promise.resolve()
-  : fetch("https://registry.npmjs.org/ubereats-cli/latest", {
+  : fetch("https://registry.npmjs.org/grocery-cli/latest", {
       signal: AbortSignal.timeout(2000),
     })
       .then((r) => r.json())
@@ -24,7 +24,7 @@ const updateCheck = skipUpdateCheck
           console.log(
             `\n  ${green.bold("Update available:")} ${chalk.dim(currentVersion)} ${chalk.dim("\u2192")} ${green(data.version)}`
           );
-          console.log(`  Run ${chalk.cyan("npm install -g ubereats-cli@latest")} to update\n`);
+          console.log(`  Run ${chalk.cyan("npm install -g grocery-cli@latest")} to update\n`);
         }
       })
       .catch(() => {});
@@ -42,10 +42,11 @@ const commands: Record<string, string> = {
   checkout: "src/commands/checkout.ts",
   "place-order": "src/commands/place-order.ts",
   orders: "src/commands/orders.ts",
+  order: "src/commands/order.ts",
   login: "src/commands/login.ts",
   addresses: "src/commands/addresses.ts",
   tip: "src/commands/tip.ts",
-  server: "../server.ts",
+  server: "server.ts",
   mcp: "src/mcp/index.ts",
 };
 
@@ -83,7 +84,7 @@ ${b("API")}
   ${c("server")}                             Start REST API server (port 3200)
   ${c("mcp")}                                Start MCP server (for Claude Code)
 
-${d("Usage:")}  ubereats <command> [args...]
+  ${d("Usage:")}  grocery <command> [args...] [--provider <name>]
 `);
   process.exit(command && command !== "help" ? 1 : 0);
 }

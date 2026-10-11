@@ -1,4 +1,30 @@
+# Dependencies and build artifacts
 node_modules/
-.ubereats-config.json
-.ubereats-session.json
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local credentials, sessions, and environment
+.env
+.env.*
+!.env.example
+.*-config.json
+.*-session.json
+.mcp.json
+.aws/
+*.pem
+*.key
+
+# Local tooling and duplicate reference checkout
+.agents/
+.codex/
+skills-lock.json
+ubereats-cli/
+
+# Debugging captures and logs
+dump*
 *.log
+*.har
+playwright-report/
+test-results/
+.DS_Store

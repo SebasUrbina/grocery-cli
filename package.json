@@ -1,11 +1,11 @@
 {
-  "name": "ubereats-cli",
-  "version": "0.0.2",
-  "description": "Order from Uber Eats via terminal, REST API, or MCP server for Claude",
-  "author": "Cristian Correa",
+  "name": "grocery-cli",
+  "version": "0.1.0",
+  "description": "Order from any grocery delivery service via terminal, REST API, or MCP server for Claude",
+  "author": "Sebastián Urbina",
   "license": "MIT",
   "keywords": [
-    "uber-eats",
+    "grocery",
     "cli",
     "food-delivery",
     "mcp",
@@ -14,7 +14,7 @@
     "bun"
   ],
   "bin": {
-    "ubereats": "index.ts"
+    "grocery": "index.ts"
   },
   "module": "index.ts",
   "type": "module",
@@ -43,10 +43,12 @@
     "login": "bun run src/commands/login.ts",
     "addresses": "bun run src/commands/addresses.ts",
     "server": "bun run server.ts",
-    "mcp": "bun run src/mcp/index.ts"
+    "mcp": "bun run src/mcp/index.ts",
+    "typecheck": "tsc --noEmit",
+    "order": "bun run src/commands/order.ts"
   },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "^1.3.13"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -61,6 +63,6 @@
     "zod": "^4.3.6"
   },
   "optionalDependencies": {
-    "playwright": "^1.58.2"
+    "playwright": "^1.59.1"
   }
 }

@@ -1,28 +1,31 @@
-import { saveConfig } from "./config";
-import type { UberEatsConfig } from "./schemas/config";
-import { ok, fail, dim, hint } from "./ui";
+import { saveConfig, loadConfig } from "./config";
+import type { Config } from "./schemas/config";
+import { ok, fail, dim, hint, brandBold } from "./ui";
+import { parseProviderArgs } from "./utils/args";
 
-const cookies = process.argv[2];
-if (!cookies) {
-  console.error("Usage: ubereats setup <cookies> [lat] [lng]");
-  console.error("\nGet your cookies from browser DevTools → Application → Cookies → ubereats.com");
-  console.error("Copy all cookies as: sid=VALUE; csid=VALUE; ...");
+const { provider, args } = parseProviderArgs(process.argv.slice(2));
+
+const token = args[0];
+if (!token) {
+  console.error("Usage: grocery setup <token> [--provider <name>]");
+  console.error("\nGet your JWT token from browser DevTools → Network -> Request Headers -> Authorization: Bearer <token>");
   process.exit(1);
 }
 
-const latArg = process.argv[3];
-const lngArg = process.argv[4];
+const config = await loadConfig().catch(() => ({ providers: {} } as Config));
 
-const config: UberEatsConfig = {
-  cookies,
-  lat: latArg ? parseFloat(latArg) : 40.7128,
-  lng: lngArg ? parseFloat(lngArg) : -73.9060,
+if (!config.providers) {
+  config.providers = {};
+}
+
+config.providers[provider.toLowerCase()] = {
+  ...config.providers[provider.toLowerCase()],
+  token
 };
 
 await saveConfig(config);
-console.log(`\n${ok("Config saved! You can now use the CLI.")}\n`);
+console.log(`\n${ok(`Config saved for ${brandBold(provider)}! You can now use the CLI.`)}\n`);
 
 console.log(`  ${dim("What's next?")}\n`);
-console.log(`  ${hint("ubereats search <query>")}     Search for food`);
-console.log(`  ${hint("ubereats restaurants")}         Browse restaurants`);
-console.log(`  ${hint("ubereats addresses")}           Check delivery address\n`);
+console.log(`  ${hint(`grocery search "leche" --provider ${provider}`)}     Search for food`);
+console.log(`  ${hint(`grocery cart --provider ${provider}`)}             Check your cart\n`);

@@ -1,9 +1,12 @@
 import { loadConfig } from "../config";
 import { getUser } from "../services/auth";
 import { printDetail, withSpinner, dim } from "../ui";
+import { parseProviderArgs } from "../utils/args";
+
+const { provider } = parseProviderArgs(process.argv.slice(2));
 
 const config = await loadConfig();
-const user = await withSpinner("Loading profile...", () => getUser(config));
+const user = await withSpinner(`Loading profile from ${provider}...`, () => getUser(config, provider));
 
 function mask(value: string, visibleStart = 3, visibleEnd = 2): string {
   if (value.length <= visibleStart + visibleEnd) return value;
@@ -12,10 +15,10 @@ function mask(value: string, visibleStart = 3, visibleEnd = 2): string {
 }
 
 const maskedEmail = user.email
-  ? mask(user.email.split("@")[0]) + "@" + user.email.split("@")[1]
+  ? mask(user.email.split("@")[0] || "") + "@" + user.email.split("@")[1]
   : "--";
 const maskedPhone = user.phone
-  ? "\u2022".repeat(user.phone.length - 4) + user.phone.slice(-4)
+  ? "\u2022".repeat(Math.max(0, user.phone.length - 4)) + user.phone.slice(-4)
   : "--";
 
 printDetail("Your Profile", [
@@ -23,5 +26,5 @@ printDetail("Your Profile", [
   ["Email", maskedEmail],
   ["Phone", maskedPhone],
   ["User ID", user.userId ? mask(user.userId) : "--"],
-  ["Coords", `${config.lat.toFixed(2)}, ${config.lng.toFixed(2)}`],
+  ["Coords", config.lat && config.lng ? `${config.lat.toFixed(2)}, ${config.lng.toFixed(2)}` : "--"],
 ]);

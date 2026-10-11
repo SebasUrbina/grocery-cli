@@ -1,24 +1,24 @@
 import { existsSync } from "fs";
+import { chmod } from "fs/promises";
 import { join } from "path";
-import { UberEatsConfigSchema, type UberEatsConfig } from "./schemas/config";
+import { ConfigSchema, type Config } from "./schemas/config";
 import { CONFIG_FILENAME } from "./constants";
 
 const CONFIG_PATH = join(import.meta.dir, "..", CONFIG_FILENAME);
 
-export async function loadConfig(): Promise<UberEatsConfig> {
+export async function loadConfig(): Promise<Config> {
   if (!existsSync(CONFIG_PATH)) {
-    throw new Error(
-      `No config found. Run: ubereats login`
-    );
+    return ConfigSchema.parse({});
   }
   const text = await Bun.file(CONFIG_PATH).text();
-  const parsed = UberEatsConfigSchema.safeParse(JSON.parse(text));
+  const parsed = ConfigSchema.safeParse(JSON.parse(text));
   if (!parsed.success) {
     throw new Error(`Invalid config: ${parsed.error.message}`);
   }
   return parsed.data;
 }
 
-export async function saveConfig(config: UberEatsConfig): Promise<void> {
-  await Bun.write(CONFIG_PATH, JSON.stringify(config, null, 2));
+export async function saveConfig(config: Config): Promise<void> {
+  await Bun.write(CONFIG_PATH, JSON.stringify(config, null, 2), { mode: 0o600 });
+  await chmod(CONFIG_PATH, 0o600);
 }

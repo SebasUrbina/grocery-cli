@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 
-export const UberEatsUserSchema = z
+export const UserSchema = z
   .object({
     name: z.string(),
     email: z.string(),
@@ -9,4 +9,4 @@ export const UberEatsUserSchema = z
   })
   .passthrough();
 
-export type UberEatsUser = z.infer<typeof UberEatsUserSchema>;
+export type User = z.infer<typeof UserSchema>;

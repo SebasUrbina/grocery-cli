@@ -1,11 +1,13 @@
 import { loadConfig } from "../config";
 import { setTip } from "../services/checkout";
 import { withSpinner, ok, bold } from "../ui";
+import { parseProviderArgs } from "../utils/args";
 
-const tipArg = process.argv[2];
+const { provider, args } = parseProviderArgs(process.argv.slice(2));
+const tipArg = args[0];
 
 if (!tipArg) {
-  console.error("Usage: ubereats tip <percent>");
+  console.error("Usage: grocery tip <percent> [--provider <name>]");
   console.error("  percent: tip percentage (e.g., 15) or 0 to remove tip");
   console.error("  Common options: 0, 5, 10, 15, 20");
   process.exit(1);
@@ -13,7 +15,7 @@ if (!tipArg) {
 
 const tip = parseInt(tipArg);
 const config = await loadConfig();
-await withSpinner("Setting tip...", () => setTip(tip, config));
+await withSpinner(`Setting tip on ${provider}...`, () => setTip(tip, config, provider));
 
 if (tip > 0) {
   console.log(`\n${ok(`Tip set to ${bold(`${tip}%`)}`)}\n`);
