@@ -66,6 +66,10 @@ Ejemplo de configuración MCP local (ajusta la ruta; `.mcp.json` está ignorado)
 }
 ```
 
+## Integración en una app de comida
+
+La [guía de conocimiento para carritos](docs/CART_INTEGRATION_KNOWLEDGE.md) documenta el flujo actual, los contratos, la resolución de slug a SKU y una propuesta de optimización desde recetas. El [brief para otro agente](docs/AGENT_HANDOFF.md) resume el objetivo, las reglas y los entregables de la integración.
+
 ## Credenciales y archivos locales
 
 Se excluyen de Git `.env*` (excepto `.env.example`), configuraciones y sesiones locales, `.mcp.json`, capturas `dump*`, archivos HAR, logs, herramientas locales y la copia de referencia `ubereats-cli/`. Los ejemplos contienen nombres y campos vacíos, sin credenciales.
